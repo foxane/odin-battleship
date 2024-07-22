@@ -22,4 +22,12 @@ export default [
   {
     ignores: ['*config.*'],
   },
+  {
+    rules: {
+      curly: 'off',
+      'no-magic-numbers': 'off',
+      'no-ternary': 'off',
+      'id-length': 'off',
+    },
+  },
 ];

@@ -6,6 +6,7 @@ export default class Ship {
 
   hit() {
     this.hitCount += 1;
+    return true;
   }
 
   isSunk() {

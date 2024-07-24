@@ -1,6 +1,7 @@
 import Ship from './ship';
 
 export default class Gameboard {
+  allShip = [];
   missedAttacks = [];
   hitAttacks = [];
   size = 10;
@@ -15,10 +16,28 @@ export default class Gameboard {
     );
   }
 
-  // NOTE: Add validation for out of bound coordinate
+  #isInbound(coordinate, ...others) {
+    const isValid = ([row, col]) =>
+      row < this.size && row >= 0 && col < this.size && col >= 0;
+
+    if (others && others.length >= 1) {
+      others.push(coordinate);
+      for (const item of others) {
+        if (!isValid(item)) return false;
+      }
+      return true;
+    }
+
+    return isValid(coordinate);
+  }
+
   placeShip(start, end) {
-    // Coordinate validation: start is bigger than end
-    if (start[0] > end[0] || start[1] > end[1]) return false;
+    // Coordinate validation: (start is bigger than end) && is not inbound
+    if (
+      (start[0] > end[0] || start[1] > end[1]) &&
+      !this.#isInbound(start, end)
+    )
+      return false;
 
     const [[rowStart, colStart], [rowEnd, colEnd]] = [start, end],
       axis = rowEnd - rowStart > 0 ? 'hor' : 'ver',
@@ -37,6 +56,7 @@ export default class Gameboard {
       cellSequence.push([row, col]);
     }
 
+    this.allShip.push(newShip);
     cellSequence.forEach(([row, col]) => (this.board[row][col] = newShip));
     return true;
   }
@@ -50,5 +70,9 @@ export default class Gameboard {
     this.board[row][col].hit();
     this.hitAttacks.push([row, col]);
     return true;
+  }
+
+  isAllSunk() {
+    return this.allShip.every((ship) => ship.isSunk());
   }
 }

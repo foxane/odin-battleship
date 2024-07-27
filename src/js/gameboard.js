@@ -2,9 +2,11 @@ import Ship from './ship';
 
 export default class Gameboard {
   allShip = [];
+  shipCoordinates = [];
   missedAttacks = [];
   hitAttacks = [];
   size = 10;
+  DEFAULT_SHIPS_LENGTH = [5, 4, 3, 3, 2, 2, 2];
 
   constructor() {
     this.create2DArray(this.size);
@@ -16,48 +18,36 @@ export default class Gameboard {
     );
   }
 
-  #isInbound(coordinate, ...others) {
-    const isValid = ([row, col]) =>
-      row < this.size && row >= 0 && col < this.size && col >= 0;
-
-    if (others && others.length >= 1) {
-      others.push(coordinate);
-      for (const item of others) {
-        if (!isValid(item)) return false;
-      }
-      return true;
-    }
-
-    return isValid(coordinate);
+  #isInbound([row, col]) {
+    return row < this.size && row >= 0 && col < this.size && col >= 0;
   }
 
-  placeShip(start, end) {
-    // Coordinate validation: (start is bigger than end) && is not inbound
-    if (
-      (start[0] > end[0] || start[1] > end[1]) &&
-      !this.#isInbound(start, end)
-    )
-      return false;
+  placeShip([row, col], length, axis) {
+    const newShip = new Ship(length);
 
-    const [[rowStart, colStart], [rowEnd, colEnd]] = [start, end],
-      axis = rowEnd - rowStart > 0 ? 'hor' : 'ver',
-      cellSequence = [],
-      length = axis === 'hor' ? rowEnd - rowStart + 1 : colEnd - colStart + 1,
-      newShip = new Ship(length);
-
-    // Populate cell sequence
+    // Validate cell sequence
     for (let i = 0; i < length; i += 1) {
-      const col = axis === 'ver' ? colStart + i : colStart,
-        row = axis === 'hor' ? rowStart + i : rowStart;
-      if (this.board[row][col] !== null) {
-        // Break function when cell is occupied
+      const currentCol = axis === 'hor' ? col + i : col,
+        currentRow = axis === 'ver' ? row + i : row;
+
+      // Coordinate is either out of bound or overlapped with other ship
+      if (
+        !this.#isInbound([currentRow, currentCol]) ||
+        this.board[currentRow][currentCol] !== null
+      )
         return false;
-      }
-      cellSequence.push([row, col]);
+    }
+
+    // Populate cells
+    for (let i = 0; i < length; i += 1) {
+      const currentCol = axis === 'hor' ? col + i : col,
+        currentRow = axis === 'ver' ? row + i : row;
+
+      this.board[currentRow][currentCol] = newShip;
+      this.shipCoordinates.push([currentRow, currentCol]);
     }
 
     this.allShip.push(newShip);
-    cellSequence.forEach(([row, col]) => (this.board[row][col] = newShip));
     return true;
   }
 
@@ -74,5 +64,25 @@ export default class Gameboard {
 
   isAllSunk() {
     return this.allShip.every((ship) => ship.isSunk());
+  }
+
+  #randomCoor() {
+    return [
+      Math.floor(Math.random() * this.size),
+      Math.floor(Math.random() * this.size),
+    ];
+  }
+
+  placeRandomShip() {
+    for (const ship of this.DEFAULT_SHIPS_LENGTH) {
+      let axis = Math.floor(Math.random() * 2) > 0 ? 'hor' : 'ver',
+        coordinate = this.#randomCoor();
+
+      while (!this.placeShip(coordinate, ship, axis)) {
+        coordinate = this.#randomCoor();
+        axis = Math.floor(Math.random() * 2) > 0 ? 'hor' : 'ver';
+      }
+    }
+    return true;
   }
 }

@@ -28,7 +28,7 @@ describe('Gameboard : place ship', () => {
   beforeEach(() => (gameboard = new Gameboard()));
 
   test('Place ship : horizontal', () => {
-    expect(gameboard.placeShip([0, 1], [0, 2])).toBe(true);
+    expect(gameboard.placeShip([0, 1], 2, 'hor')).toBe(true);
     expect(gameboard.board[0][0]).toBe(null);
     expect(gameboard.board[0][1] instanceof Ship).toBe(true);
     expect(gameboard.board[0][2] instanceof Ship).toBe(true);
@@ -36,39 +36,32 @@ describe('Gameboard : place ship', () => {
   });
 
   test('Place ship : vertical', () => {
-    expect(gameboard.placeShip([0, 5], [5, 5])).toBe(true);
+    expect(gameboard.placeShip([0, 5], 5, 'ver')).toBe(true);
     expect(gameboard.board[0][4]).toBe(null);
     expect(gameboard.board[0][5] instanceof Ship).toBe(true);
-    expect(gameboard.board[5][5] instanceof Ship).toBe(true);
-    expect(gameboard.board[5][6]).toBe(null);
+    expect(gameboard.board[4][5] instanceof Ship).toBe(true);
+    expect(gameboard.board[5][5]).toBe(null);
   });
 
   test('Place ship : ship length of 1', () => {
-    expect(gameboard.placeShip([0, 0], [0, 0])).toBe(true);
+    expect(gameboard.placeShip([0, 0], 1, 'ver')).toBe(true);
     expect(gameboard.board[0][0] instanceof Ship).toBe(true);
   });
 
   test('Place ship : used cell', () => {
-    expect(gameboard.placeShip([0, 0], [4, 0])).toBe(true);
-    expect(gameboard.placeShip([0, 0], [0, 5])).toBe(false);
+    expect(gameboard.placeShip([0, 0], 5, 'ver')).toBe(true);
+    expect(gameboard.placeShip([0, 0], 5, 'hor')).toBe(false);
   });
 
   test('Place ship : out of bound', () => {
-    expect(gameboard.placeShip([0, 1], [12, 0])).toBe(false);
-    expect(gameboard.board.some((row) => row.some((col) => col !== null))).toBe(
-      false,
-    );
-  });
-
-  test('Place ship : invalid coordinate (start: 10, end: 1)', () => {
-    expect(gameboard.placeShip([0, 10], [0, 1])).toBe(false);
+    expect(gameboard.placeShip([0, 12], 10, 'hor')).toBe(false);
     expect(gameboard.board.some((row) => row.some((col) => col !== null))).toBe(
       false,
     );
   });
 
   test('Place ship : store ship instance', () => {
-    gameboard.placeShip([0, 0], [0, 0]);
+    gameboard.placeShip([0, 0], 1, 'ver');
     expect(gameboard.allShip[0] instanceof Ship).toBe(true);
   });
 });
@@ -77,8 +70,8 @@ describe('Gameboardd : receive attack', () => {
   let gameboard = null;
   beforeEach(() => {
     gameboard = new Gameboard();
-    gameboard.placeShip([0, 0], [0, 4]);
-    gameboard.placeShip([1, 0], [3, 0]);
+    gameboard.placeShip([0, 0], 5, 'hor');
+    gameboard.placeShip([1, 0], 3, 'ver');
   });
 
   test('Receive attack : hit', () => {
@@ -105,7 +98,7 @@ describe('Is all ship sunk', () => {
   let gameboard = null;
   beforeEach(() => {
     gameboard = new Gameboard();
-    gameboard.placeShip([0, 0], [0, 2]);
+    gameboard.placeShip([0, 0], 3, 'hor');
   });
 
   test('All sunk : happy path', () => {
@@ -118,5 +111,12 @@ describe('Is all ship sunk', () => {
   test('All sunk : hitted, not sunk', () => {
     gameboard.receiveAttack([0, 0]);
     expect(gameboard.isAllSunk()).toBe(false);
+  });
+});
+
+describe('Random placement', () => {
+  const gameboard = new Gameboard();
+  test('Random ? idk how to test, i use console.table for this', () => {
+    expect(gameboard.placeRandomShip()).toBe(true);
   });
 });

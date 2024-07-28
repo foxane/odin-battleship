@@ -115,8 +115,11 @@ describe('Is all ship sunk', () => {
 });
 
 describe('Random placement', () => {
-  const gameboard = new Gameboard();
-  test('Random ? idk how to test, i use console.table for this', () => {
-    expect(gameboard.placeRandomShip()).toBe(true);
+  test('Random : do it 10 times', () => {
+    for (let i = 0; i < 10; i += 1) {
+      const gameboard = new Gameboard();
+      gameboard.placeRandomShip();
+      expect(gameboard.allShip.length).toBe(9);
+    }
   });
 });

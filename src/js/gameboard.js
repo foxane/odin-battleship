@@ -6,7 +6,17 @@ export default class Gameboard {
   missedAttacks = [];
   hitAttacks = [];
   size = 10;
-  DEFAULT_SHIPS_LENGTH = [5, 4, 3, 3, 2, 2, 2];
+  DEFAULT_SHIPS_LENGTH = [5, 4, 4, 3, 3, 3, 2, 2, 2];
+  ADJACENT_EDGES = [
+    [+0, +1],
+    [+0, -1],
+    [+1, +0],
+    [+1, +1],
+    [+1, -1],
+    [-1, +1],
+    [-1, +0],
+    [-1, -1],
+  ];
 
   constructor() {
     this.create2DArray(this.size);
@@ -18,8 +28,24 @@ export default class Gameboard {
     );
   }
 
-  #isInbound([row, col]) {
-    return row < this.size && row >= 0 && col < this.size && col >= 0;
+  #validateCoordinate(row, col) {
+    const unoccupied = (x, y) => this.board[x][y] === null;
+    const inBound = (x, y) =>
+      x < this.size && x >= 0 && y < this.size && y >= 0;
+    const noAdjacent = (row_, col_) => {
+      for (let [x, y] of this.ADJACENT_EDGES) {
+        x += row_;
+        y += col_;
+
+        if (inBound(x, y)) {
+          const cell = this.board[x][y];
+          if (cell !== null) return false;
+        }
+      }
+      return true;
+    };
+
+    return noAdjacent(row, col) && inBound(row, col) && unoccupied(row, col);
   }
 
   placeShip([row, col], length, axis) {
@@ -31,11 +57,7 @@ export default class Gameboard {
         currentRow = axis === 'ver' ? row + i : row;
 
       // Coordinate is either out of bound or overlapped with other ship
-      if (
-        !this.#isInbound([currentRow, currentCol]) ||
-        this.board[currentRow][currentCol] !== null
-      )
-        return false;
+      if (!this.#validateCoordinate(currentRow, currentCol)) return false;
     }
 
     // Populate cells
@@ -74,11 +96,11 @@ export default class Gameboard {
   }
 
   placeRandomShip() {
-    for (const ship of this.DEFAULT_SHIPS_LENGTH) {
+    for (const shipLength of this.DEFAULT_SHIPS_LENGTH) {
       let axis = Math.floor(Math.random() * 2) > 0 ? 'hor' : 'ver',
         coordinate = this.#randomCoor();
 
-      while (!this.placeShip(coordinate, ship, axis)) {
+      while (!this.placeShip(coordinate, shipLength, axis)) {
         coordinate = this.#randomCoor();
         axis = Math.floor(Math.random() * 2) > 0 ? 'hor' : 'ver';
       }

@@ -8,15 +8,15 @@
   --fs-normal: 1rem;
   --fs-small: 0.9rem;
 
-  --border: 1px solid black;
+  --border: 1px solid rgb(255, 255, 255);
   --border-board: 2px solid black;
-  --border-cell: 1px solid rgb(87, 83, 83);
+  --border-cell: 1px solid rgb(255, 255, 255);
 
-  --clr-bg: rgb(255, 255, 255);
-  --clr-text: black;
+  --clr-bg: rgb(0, 0, 0);
+  --clr-text: rgb(254, 249, 249);
 
-  --clr-game-bg: rgb(255, 252, 252);
-  --clr-board: white;
+  --clr-game-bg: rgb(0, 0, 0);
+  --clr-board: rgb(255, 255, 255);
   --clr-ship: rgb(198, 238, 249);
   --clr-cell: grey;
   --clr-hit: red;
@@ -86,6 +86,7 @@ main {
     border: var(--border-cell);
     width: var(--width-cell);
     height: var(--height-cell);
+    transition: background 0.25s;
   }
 }
 

@@ -1,41 +1,40 @@
-import attack from './index';
-export default class Dom {
-  size = 10;
+const BOARD_SIZE = 10;
 
-  createBoard(inactive) {
-    const board = document.createElement('div');
-    if (inactive) board.classList.add('inactive');
-    board.classList.add('board');
+const createBoard = (callback) => {
+  const board = document.createElement('div');
+  board.classList.add('board');
 
-    for (let row = 0; row < this.size; row += 1) {
-      for (let col = 0; col < this.size; col += 1) {
-        const cell = document.createElement('div');
-        cell.classList.add('cell');
-        this.#setCellAttr(cell, [row, col], inactive);
-        board.appendChild(cell);
-      }
-    }
-    return board;
-  }
+  // Add inactive class if computer (for init)
+  if (callback) board.classList.add('inactive');
 
-  #setCellAttr(cell, [row, col], inactive) {
-    cell.dataset.row = row;
-    cell.dataset.col = col;
-    cell.dataset.status = null;
+  for (let row = 0; row < BOARD_SIZE; row += 1) {
+    for (let col = 0; col < BOARD_SIZE; col += 1) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.dataset.row = row;
+      cell.dataset.col = col;
+      cell.dataset.status = 'null';
 
-    // If board is inactive add listener to them
-    if (inactive)
-      cell.addEventListener('click', (e) => {
-        attack(cell);
-      });
-  }
+      // Callback is provided
+      if (callback)
+        cell.addEventListener('click', () => {
+          callback(cell);
+        });
 
-  renderBoard(shipCoordinates) {
-    for (const [row, col] of shipCoordinates) {
-      const cell = document.querySelector(
-        `.cell[data-row="${row}"][data-col="${col}"]`,
-      );
-      cell.style.backgroundColor = 'blue';
+      board.appendChild(cell);
     }
   }
-}
+
+  return board;
+};
+
+const renderBoard = (shipCoordinates) => {
+  for (const [row, col] of shipCoordinates) {
+    const cell = document.querySelector(
+      `.cell[data-row="${row}"][data-col="${col}"]`,
+    );
+    cell.style.backgroundColor = 'blue';
+  }
+};
+
+export { createBoard, renderBoard };

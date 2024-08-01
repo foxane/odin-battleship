@@ -28,6 +28,12 @@ export default class Gameboard {
     );
   }
 
+  resetBoard() {
+    this.allShip = [];
+    this.shipCoordinates = [];
+    this.create2DArray(this.size);
+  }
+
   #validateCoordinate(row, col) {
     const unoccupied = (x, y) => this.board[x][y] === null;
     const inBound = (x, y) =>

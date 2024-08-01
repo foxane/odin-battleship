@@ -11,6 +11,7 @@ export default class Player {
     this.gameboard = new Gameboard();
   }
 
-  // Computer logic, to be added later ..
-  // ..
+  attack() {
+    return [Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)];
+  }
 }

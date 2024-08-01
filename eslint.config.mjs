@@ -28,6 +28,7 @@ export default [
       'no-magic-numbers': 'off',
       'no-ternary': 'off',
       'id-length': 'off',
+      'one-var': 'off',
     },
   },
 ];

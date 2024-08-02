@@ -20,25 +20,25 @@ export default class Gameboard {
   ];
 
   constructor() {
-    this.create2DArray(this.size);
+    this.create2DArray(Gameboard.size);
   }
 
   create2DArray() {
-    this.board = Array.from({ length: this.size }, () =>
-      Array.from({ length: this.size }, () => null),
+    this.board = Array.from({ length: Gameboard.size }, () =>
+      Array.from({ length: Gameboard.size }, () => null),
     );
   }
 
   resetBoard() {
     this.allShip = [];
     this.shipCoordinates = [];
-    this.create2DArray(this.size);
+    this.create2DArray(Gameboard.size);
   }
 
   #validateCoordinate(row, col) {
     const unoccupied = (x, y) => this.board[x][y] === null;
     const inBound = (x, y) =>
-      x < this.size && x >= 0 && y < this.size && y >= 0;
+      x < Gameboard.size && x >= 0 && y < Gameboard.size && y >= 0;
     const noAdjacent = (row_, col_) => {
       for (let [x, y] of this.ADJACENT_EDGES) {
         x += row_;
@@ -95,20 +95,19 @@ export default class Gameboard {
     return this.allShip.every((ship) => ship.isSunk());
   }
 
-  #randomCoor() {
-    return [
-      Math.floor(Math.random() * this.size),
-      Math.floor(Math.random() * this.size),
-    ];
-  }
-
   placeRandomShip() {
     for (const shipLength of this.DEFAULT_SHIPS_LENGTH) {
       let axis = Math.floor(Math.random() * 2) > 0 ? 'hor' : 'ver',
-        coordinate = this.#randomCoor();
+        coordinate = [
+          Math.floor(Math.random() * Gameboard.size),
+          Math.floor(Math.random() * Gameboard.size),
+        ];
 
       while (!this.placeShip(coordinate, shipLength, axis)) {
-        coordinate = this.#randomCoor();
+        coordinate = [
+          Math.floor(Math.random() * Gameboard.size),
+          Math.floor(Math.random() * Gameboard.size),
+        ];
         axis = Math.floor(Math.random() * 2) > 0 ? 'hor' : 'ver';
       }
     }

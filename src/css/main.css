@@ -82,6 +82,8 @@ main {
 
   border: var(--border-board);
 
+  transition: opacity 0.5s;
+
   .cell {
     border: var(--border-cell);
     width: var(--width-cell);
@@ -111,4 +113,8 @@ main {
   top: 44%;
   left: 34%;
   z-index: 1;
+}
+
+.reset-btn {
+  display: none;
 }

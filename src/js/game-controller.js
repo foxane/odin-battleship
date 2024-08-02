@@ -1,4 +1,5 @@
 import Dom from './dom';
+import Gameboard from './gameboard';
 import Player from './player';
 
 export default class GameController {
@@ -6,8 +7,12 @@ export default class GameController {
     // Set up enviroment
     this.player = new Player();
     this.computer = new Player('computer');
-    this.turn = this.player;
-    this.dom = new Dom();
+    this.turn = 'over';
+    this.dom = new Dom({
+      randomizeBtnCb: this.#randomizePlayerShip.bind(this),
+      resetBtnCb: this.#resetGame.bind(this),
+      startBtnCb: this.#startGame.bind(this),
+    });
 
     // Initialize
     this.#init();
@@ -16,14 +21,13 @@ export default class GameController {
   #init() {
     this.dom.playerElement.appendChild(this.dom.createBoard());
     this.dom.computerElement.appendChild(
-      this.dom.createBoard(this.playerAttack),
+      this.dom.createBoard(this.playerAttack.bind(this)),
     );
 
-    /*   NOTE : Below code resulted in infinite loop, find out why before running it */
-
-    // this.player.gameboard.placeRandomShip();
-    // this.computer.gameboard.placeRandomShip();
-    // this.dom.playerElement.renderBoard(this.player.gameboard.shipCoordinates);
+    this.player.gameboard.placeRandomShip();
+    this.computer.gameboard.placeRandomShip();
+    this.dom.renderBoard(this.player.gameboard.shipCoordinates, true);
+    console.table(this.computer.gameboard.board);
   }
 
   playerAttack(cell) {
@@ -37,24 +41,117 @@ export default class GameController {
     // Began Attack
     if (this.computer.gameboard.receiveAttack([row, col])) {
       cell.style.backgroundColor = 'red';
-      this.#playerAttackHitHandler([row, col]);
+      this.#hitHandler([row, col], true);
     } else {
       cell.style.backgroundColor = 'white';
       this.turn = this.computer;
+      this.computerAttack();
     }
+    cell.dataset.status = 'hit';
   }
 
-  #playerAttackHitHandler([row, col]) {
+  computerAttack() {
+    this.dom.computerElement.querySelector('.board').classList.add('inactive');
+    this.dom.playerElement.querySelector('.board').classList.remove('inactive');
+    setTimeout(() => {
+      if (this.turn !== this.computer) return;
+      const getRandomCoor = () => [
+        Math.floor(Math.random() * Gameboard.size),
+        Math.floor(Math.random() * Gameboard.size),
+      ];
+
+      let [row, col] = getRandomCoor();
+      let cell = Dom.getCellElement([row, col], true);
+
+      while (cell.dataset.status !== 'null') {
+        [row, col] = getRandomCoor();
+        cell = Dom.getCellElement([row, col], true);
+      }
+
+      // Hit
+      if (this.player.gameboard.receiveAttack([row, col])) {
+        cell.style.backgroundColor = 'red';
+        cell.dataset.status = 'hit';
+        this.#hitHandler([row, col], false);
+        this.computerAttack();
+      } else {
+        cell.style.backgroundColor = 'white';
+        cell.dataset.status = 'miss';
+        this.dom.computerElement
+          .querySelector('.board')
+          .classList.remove('inactive');
+        this.dom.playerElement
+          .querySelector('.board')
+          .classList.add('inactive');
+        this.turn = this.player;
+      }
+    }, 1000);
+  }
+
+  #hitHandler([row, col], isPlayer) {
     // Ship sunken
-    if (this.player.gameboard.board[row][col].isSunk()) {
-      for (const [x, y] of this.computer.shipCoordinates) {
-        if (this.computer.gameboard.board[x][y].isSunk()) {
-          const cell = document.querySelector(
-            `.cell[data-row="${x}"][data-col="${y}"][data-player="true"]`,
-          );
-          cell.style.backgroundColor = 'black';
+    if (isPlayer) {
+      if (this.computer.gameboard.board[row][col].isSunk()) {
+        for (const [x, y] of this.computer.gameboard.shipCoordinates) {
+          if (this.computer.gameboard.board[x][y].isSunk()) {
+            const cell = document.querySelector(
+              `.cell[data-row="${x}"][data-col="${y}"][data-player="false"]`,
+            );
+            cell.style.backgroundColor = 'green';
+          }
+        }
+      }
+    } else {
+      if (this.player.gameboard.board[row][col].isSunk()) {
+        for (const [x, y] of this.player.gameboard.shipCoordinates) {
+          if (this.player.gameboard.board[x][y].isSunk()) {
+            const cell = document.querySelector(
+              `.cell[data-row="${x}"][data-col="${y}"][data-player="true"]`,
+            );
+            cell.style.backgroundColor = 'green';
+          }
         }
       }
     }
+
+    if (this.computer.gameboard.isAllSunk()) {
+      alert('you win');
+      this.#resetGame();
+    }
+  }
+
+  #randomizePlayerShip() {
+    this.player.gameboard.resetBoard();
+    this.player.gameboard.placeRandomShip();
+    this.dom.renderBoard(this.player.gameboard.shipCoordinates, true);
+  }
+
+  #resetGame() {
+    this.player.gameboard.resetBoard();
+    this.player.gameboard.placeRandomShip();
+    this.computer.gameboard.resetBoard();
+    this.computer.gameboard.placeRandomShip();
+
+    this.dom.clearBoardElement(true);
+    this.dom.clearBoardElement(false);
+    this.dom.renderBoard(this.player.gameboard.shipCoordinates, true);
+
+    this.dom.enableBtn('start-btn');
+    this.dom.enableBtn('randomize-btn');
+    this.dom.disableBtn('reset-btn');
+
+    this.turn = 'over';
+  }
+
+  #startGame() {
+    this.dom.disableBtn('start-btn');
+    this.dom.disableBtn('randomize-btn');
+    this.dom.enableBtn('reset-btn');
+
+    this.dom.computerElement
+      .querySelector('.board')
+      .classList.remove('inactive');
+
+    this.turn = this.player;
   }
 }

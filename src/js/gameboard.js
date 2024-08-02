@@ -1,11 +1,12 @@
 import Ship from './ship';
 
 export default class Gameboard {
+  // Size reference for other module
+  static size = 10;
   allShip = [];
   shipCoordinates = [];
   missedAttacks = [];
   hitAttacks = [];
-  size = 10;
   DEFAULT_SHIPS_LENGTH = [5, 4, 4, 3, 3, 3, 2, 2, 2];
   ADJACENT_EDGES = [
     [+0, +1],

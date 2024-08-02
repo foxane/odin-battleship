@@ -1,6 +1,7 @@
 import Gameboard from './gameboard';
 
 export default class Player {
+  boardSize = Gameboard.size;
   constructor(type) {
     if (type === 'human') {
       this.isHuman = true;
@@ -11,7 +12,10 @@ export default class Player {
     this.gameboard = new Gameboard();
   }
 
-  attack() {
-    return [Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)];
+  computerAttack() {
+    return [
+      Math.floor(Math.random() * this.boardSize),
+      Math.floor(Math.random() * this.boardSize),
+    ];
   }
 }
